@@ -154,7 +154,38 @@ int object_write(ObjectType type, const void *data, size_t len, ObjectID *id_out
 // The caller is responsible for calling free(*data_out).
 // Returns 0 on success, -1 on error (file not found, corrupt, etc.).
 int object_read(const ObjectID *id, ObjectType *type_out, void **data_out, size_t *len_out) {
-    // TODO: Implement
-    (void)id; (void)type_out; (void)data_out; (void)len_out;
-    return -1;
+    char path[512];
+    object_path(id, path, sizeof(path));
+    FILE *f = fopen(path, "rb");
+    if (!f) return -1;
+
+    fseek(f, 0, SEEK_END);
+    size_t size = ftell(f);
+    rewind(f);
+
+    uint8_t *buf = malloc(size);
+    fread(buf, 1, size, f);
+    fclose(f);
+
+    // Verify Integrity
+    ObjectID check_id;
+    compute_hash(buf, size, &check_id);
+    if (memcmp(id->hash, check_id.hash, HASH_SIZE) != 0) {
+        free(buf);
+        return -1;
+    }
+
+    // Parse header (find the \0)
+    char *null_byte = memchr(buf, '\0', size);
+    size_t header_len = (null_byte - (char*)buf) + 1;
+    *len_out = size - header_len;
+    *data_out = malloc(*len_out);
+    memcpy(*data_out, buf + header_len, *len_out);
+
+    if (strncmp((char*)buf, "blob", 4) == 0) *type_out = OBJ_BLOB;
+    else if (strncmp((char*)buf, "tree", 4) == 0) *type_out = OBJ_TREE;
+    else *type_out = OBJ_COMMIT;
+
+    free(buf);
+    return 0;
 }
