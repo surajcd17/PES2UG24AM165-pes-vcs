@@ -125,7 +125,6 @@ int object_write(ObjectType type, const void *data, size_t len, ObjectID *id_out
     write(fd, full_data, full_len);
     fsync(fd);
     close(fd);
-
     rename(temp_path, final_path);
     free(full_data);
     return 0;
@@ -162,7 +161,6 @@ int object_read(const ObjectID *id, ObjectType *type_out, void **data_out, size_
     fseek(f, 0, SEEK_END);
     size_t size = ftell(f);
     rewind(f);
-
     uint8_t *buf = malloc(size);
     fread(buf, 1, size, f);
     fclose(f);
@@ -185,7 +183,6 @@ int object_read(const ObjectID *id, ObjectType *type_out, void **data_out, size_
     if (strncmp((char*)buf, "blob", 4) == 0) *type_out = OBJ_BLOB;
     else if (strncmp((char*)buf, "tree", 4) == 0) *type_out = OBJ_TREE;
     else *type_out = OBJ_COMMIT;
-
     free(buf);
     return 0;
 }
