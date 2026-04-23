@@ -116,9 +116,19 @@ int object_write(ObjectType type, const void *data, size_t len, ObjectID *id_out
     snprintf(shard_path, sizeof(shard_path), "%s/%.2s", OBJECTS_DIR, hex);
     mkdir(OBJECTS_DIR, 0755);
     mkdir(shard_path, 0755);
-    // For now, just return after hashing to make a clean commit
+
+    char temp_path[512], final_path[512];
+    object_path(id_out, final_path, sizeof(final_path));
+    snprintf(temp_path, sizeof(temp_path), "%s.tmp", final_path);
+
+    int fd = open(temp_path, O_CREAT | O_WRONLY | O_TRUNC, 0644);
+    write(fd, full_data, full_len);
+    fsync(fd);
+    close(fd);
+
+    rename(temp_path, final_path);
     free(full_data);
-    return 0; 
+    return 0;
 }
 
 // Read an object from the store.
