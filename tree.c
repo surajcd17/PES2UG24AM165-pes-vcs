@@ -91,7 +91,6 @@ int tree_serialize(const Tree *tree, void **data_out, size_t *len_out) {
     // Create a mutable copy to sort entries (Git requirement)
     Tree sorted_tree = *tree;
     qsort(sorted_tree.entries, sorted_tree.count, sizeof(TreeEntry), compare_tree_entries);
-
     size_t offset = 0;
     for (int i = 0; i < sorted_tree.count; i++) {
         const TreeEntry *entry = &sorted_tree.entries[i];
@@ -104,7 +103,6 @@ int tree_serialize(const Tree *tree, void **data_out, size_t *len_out) {
         memcpy(buffer + offset, entry->hash.hash, HASH_SIZE);
         offset += HASH_SIZE;
     }
-
     *data_out = buffer;
     *len_out = offset;
     return 0;
