@@ -84,7 +84,6 @@ int index_status(const Index *index) {
     }
     if (unstaged_count == 0) printf("  (nothing to show)\n");
     printf("\n");
-
     printf("Untracked files:\n");
     int untracked_count = 0;
     DIR *dir = opendir(".");
@@ -105,7 +104,6 @@ int index_status(const Index *index) {
                     break;
                 }
             }
-            
             if (!is_tracked) {
                 struct stat st;
                 stat(ent->d_name, &st);
@@ -175,7 +173,6 @@ int index_save(const Index *index) {
     sprintf(temp_path, "%s.tmp", INDEX_PATH);
     FILE *f = fopen(temp_path, "w");
     if (!f) return -1;
-
     for (int i = 0; i < sorted.count; i++) {
         char hex[HASH_HEX_SIZE + 1];
         hash_to_hex(&sorted.entries[i].id, hex);
