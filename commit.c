@@ -211,7 +211,6 @@ int commit_create(const char *message, ObjectID *commit_id_out) {
     } else {
         c.has_parent = 0;
     }
-
     // 4. Serialize and write to Object Store
     void *data;
     size_t len;
